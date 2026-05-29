@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "github": {
+      "type": "local",
+      "command": ["/home/user/.local/bin/gh", "mcp"],
+      "enabled": true
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["/bin/bash", "-c", "W_IP=$(ip route show default | awk '{print $3}'); exec npx -y chrome-devtools-mcp@latest -u http://${W_IP}:9223"],
+      "enabled": true
+    },
+    "shadcn": {
+      "type": "local",
+      "command": ["npx", "-y", "shadcn-mcp@latest"],
+      "enabled": true
+    }
+  }
+}
