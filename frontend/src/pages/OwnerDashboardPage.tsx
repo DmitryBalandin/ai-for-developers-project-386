@@ -1,0 +1,258 @@
+import { useEffect, useState } from 'react'
+import { Card, CardContent } from 'src/components/ui/card'
+import { Button } from 'src/components/ui/button'
+import { Input } from 'src/components/ui/input'
+import { Label } from 'src/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger,
+} from 'src/components/ui/dialog'
+import { Separator } from 'src/components/ui/separator'
+import {
+  listEventTypes,
+  createEventType,
+  updateEventType,
+  deleteEventType,
+  listUpcomingBookings,
+  type EventTypeCreate,
+  type EventTypeUpdate,
+} from 'src/api/owner'
+import type { EventType, Booking } from 'src/types'
+import { format } from 'date-fns'
+import { Clock, Edit3, Plus, Trash2, Users, Loader2 } from 'lucide-react'
+
+export function OwnerDashboardPage() {
+  const [eventTypes, setEventTypes] = useState<EventType[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingType, setEditingType] = useState<EventType | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+
+  useEffect(() => {
+    listEventTypes()
+      .then(setEventTypes)
+      .catch(() => {})
+    listUpcomingBookings()
+      .then(setBookings)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleCreate(data: EventTypeCreate) {
+    await createEventType(data)
+    setShowCreateDialog(false)
+    const types = await listEventTypes()
+    setEventTypes(types)
+  }
+
+  async function handleUpdate(id: string, data: EventTypeUpdate) {
+    await updateEventType(id, data)
+    setEditingType(null)
+    const types = await listEventTypes()
+    setEventTypes(types)
+  }
+
+  async function handleDelete(id: string) {
+    await deleteEventType(id)
+    const types = await listEventTypes()
+    setEventTypes(types)
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-12">
+      <h1 className="font-heading mb-8 text-3xl font-bold">Dashboard</h1>
+
+      <div className="mb-12 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading flex items-center gap-2 text-xl font-semibold">
+            <Clock className="size-5" />
+            Event Types
+          </h2>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger render={<Button size="sm"><Plus className="size-4" />Create</Button>} />
+            <EventTypeForm onSubmit={handleCreate} />
+          </Dialog>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {eventTypes.map((et) => (
+              <Card key={et.id} size="sm">
+                <CardContent className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{et.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {et.durationMinutes} min &middot; {et.description}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Dialog
+                      open={editingType?.id === et.id}
+                      onOpenChange={(open) => {
+                        if (!open) setEditingType(null)
+                      }}
+                    >
+                      <DialogTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setEditingType(et)}
+                          >
+                            <Edit3 className="size-4" />
+                          </Button>
+                        }
+                      />
+                      {editingType?.id === et.id && (
+                        <EventTypeForm
+                          initial={editingType}
+                          onSubmit={(data) => handleUpdate(et.id, data)}
+                        />
+                      )}
+                    </Dialog>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleDelete(et.id)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {eventTypes.length === 0 && (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                No event types yet. Create one!
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <Separator className="mb-8" />
+
+      <div className="space-y-4">
+        <h2 className="font-heading flex items-center gap-2 text-xl font-semibold">
+          <Users className="size-5" />
+          Upcoming Bookings
+        </h2>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {bookings.map((b) => (
+              <Card key={b.id} size="sm">
+                <CardContent className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{b.guestName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(b.startTime), 'MMM d, yyyy HH:mm')}
+                      {' — '}
+                      {format(new Date(b.endTime), 'HH:mm')}
+                      {b.guestEmail ? ` \u00B7 ${b.guestEmail}` : ''}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    {b.status}
+                  </span>
+                </CardContent>
+              </Card>
+            ))}
+            {bookings.length === 0 && (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                No upcoming bookings.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function EventTypeForm({
+  initial,
+  onSubmit,
+}: {
+  initial?: EventType
+  onSubmit: (data: EventTypeCreate) => Promise<void>
+}) {
+  const [title, setTitle] = useState(initial?.title ?? '')
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [duration, setDuration] = useState(String(initial?.durationMinutes ?? 30))
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSubmitting(true)
+    setError(null)
+    try {
+      await onSubmit({
+        title: title.trim(),
+        description: description.trim(),
+        durationMinutes: Number(duration),
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <DialogContent showCloseButton={!submitting}>
+      <DialogHeader>
+        <DialogTitle>{initial ? 'Edit Event Type' : 'Create Event Type'}</DialogTitle>
+        <DialogDescription>
+          {initial ? 'Update the event type details.' : 'Add a new event type for guests to book.'}
+        </DialogDescription>
+      </DialogHeader>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="et-title">Title</Label>
+          <Input id="et-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="et-desc">Description</Label>
+          <Input id="et-desc" value={description} onChange={(e) => setDescription(e.target.value)} required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="et-dur">Duration (minutes)</Label>
+          <Input
+            id="et-dur"
+            type="number"
+            min={5}
+            step={5}
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            required
+          />
+        </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <DialogFooter>
+          <DialogClose render={<Button type="button" variant="outline" disabled={submitting} />}>
+            Cancel
+          </DialogClose>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
+            {initial ? 'Save' : 'Create'}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  )
+}
