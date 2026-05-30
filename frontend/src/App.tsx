@@ -14,14 +14,14 @@ function App() {
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
             <Link to="/" className="flex items-center gap-2 font-medium">
               <Calendar className="size-5" />
-              Calendar of Calls
+              Календарь звонков
             </Link>
             <nav className="flex items-center gap-2">
               <Button variant="ghost" size="sm" render={<Link to="/book" />}>
-                Book a Call
+                Забронировать звонок
               </Button>
               <Button variant="outline" size="sm" render={<Link to="/owner" />}>
-                Dashboard
+                Панель управления
               </Button>
             </nav>
           </div>

@@ -66,16 +66,16 @@ export function OwnerDashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
-      <h1 className="font-heading mb-8 text-3xl font-bold">Dashboard</h1>
+      <h1 className="font-heading mb-8 text-3xl font-bold">Панель управления</h1>
 
       <div className="mb-12 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-heading flex items-center gap-2 text-xl font-semibold">
             <Clock className="size-5" />
-            Event Types
+            Типы событий
           </h2>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger render={<Button size="sm"><Plus className="size-4" />Create</Button>} />
+            <DialogTrigger render={<Button size="sm"><Plus className="size-4" />Создать</Button>} />
             <EventTypeForm onSubmit={handleCreate} />
           </Dialog>
         </div>
@@ -92,7 +92,7 @@ export function OwnerDashboardPage() {
                   <div>
                     <p className="font-medium">{et.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {et.durationMinutes} min &middot; {et.description}
+                      {et.durationMinutes} мин &middot; {et.description}
                     </p>
                   </div>
                   <div className="flex gap-1">
@@ -133,7 +133,7 @@ export function OwnerDashboardPage() {
             ))}
             {eventTypes.length === 0 && (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                No event types yet. Create one!
+                Пока нет типов событий. Создайте!
               </p>
             )}
           </div>
@@ -145,7 +145,7 @@ export function OwnerDashboardPage() {
       <div className="space-y-4">
         <h2 className="font-heading flex items-center gap-2 text-xl font-semibold">
           <Users className="size-5" />
-          Upcoming Bookings
+          Предстоящие брони
         </h2>
         {loading ? (
           <div className="flex justify-center py-8">
@@ -173,7 +173,7 @@ export function OwnerDashboardPage() {
             ))}
             {bookings.length === 0 && (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                No upcoming bookings.
+                Нет предстоящих броней.
               </p>
             )}
           </div>
@@ -207,7 +207,7 @@ function EventTypeForm({
         durationMinutes: Number(duration),
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save')
+      setError(err instanceof Error ? err.message : 'Не удалось сохранить')
     } finally {
       setSubmitting(false)
     }
@@ -216,22 +216,22 @@ function EventTypeForm({
   return (
     <DialogContent showCloseButton={!submitting}>
       <DialogHeader>
-        <DialogTitle>{initial ? 'Edit Event Type' : 'Create Event Type'}</DialogTitle>
+        <DialogTitle>{initial ? 'Редактировать тип события' : 'Создать тип события'}</DialogTitle>
         <DialogDescription>
-          {initial ? 'Update the event type details.' : 'Add a new event type for guests to book.'}
+          {initial ? 'Обновите детали типа события.' : 'Добавьте новый тип события для бронирования гостями.'}
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="et-title">Title</Label>
+          <Label htmlFor="et-title">Название</Label>
           <Input id="et-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="et-desc">Description</Label>
+          <Label htmlFor="et-desc">Описание</Label>
           <Input id="et-desc" value={description} onChange={(e) => setDescription(e.target.value)} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="et-dur">Duration (minutes)</Label>
+          <Label htmlFor="et-dur">Длительность (минуты)</Label>
           <Input
             id="et-dur"
             type="number"
@@ -245,11 +245,11 @@ function EventTypeForm({
         {error && <p className="text-sm text-destructive">{error}</p>}
         <DialogFooter>
           <DialogClose render={<Button type="button" variant="outline" disabled={submitting} />}>
-            Cancel
+            Отмена
           </DialogClose>
           <Button type="submit" disabled={submitting}>
             {submitting ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
-            {initial ? 'Save' : 'Create'}
+            {initial ? 'Сохранить' : 'Создать'}
           </Button>
         </DialogFooter>
       </form>

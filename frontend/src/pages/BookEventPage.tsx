@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { format, addDays, startOfDay } from 'date-fns'
+import { ru } from 'date-fns/locale'
 import { Calendar } from 'src/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
 import { Button } from 'src/components/ui/button'
@@ -33,7 +34,7 @@ export function BookEventPage() {
     getPublicEventTypes()
       .then((types) => {
         const found = types.find((t) => t.id === eventTypeId)
-        if (!found) throw new Error('Event type not found')
+        if (!found) throw new Error('Тип встречи не найден')
         setEventType(found)
       })
       .catch((e: Error) => setError(e.message))
@@ -72,10 +73,10 @@ export function BookEventPage() {
       setSuccessBooking(booking.id)
     } catch (err) {
       if (err instanceof ApiErrorResponse && err.status === 409) {
-        setError('This slot has just been taken. Please choose another one.')
+        setError('Этот слот только что заняли. Пожалуйста, выберите другой.')
         setSelectedSlot(null)
       } else {
-        setError(err instanceof Error ? err.message : 'Failed to create booking')
+        setError(err instanceof Error ? err.message : 'Не удалось создать бронь')
       }
     } finally {
       setSubmitting(false)
@@ -95,7 +96,7 @@ export function BookEventPage() {
       <div className="mx-auto max-w-5xl px-4 py-16 text-center">
         <p className="text-destructive">{error}</p>
         <Button variant="outline" className="mt-4" onClick={() => navigate('/book')}>
-          Back to event types
+          Назад к типам встреч
         </Button>
       </div>
     )
@@ -110,7 +111,7 @@ export function BookEventPage() {
               <CardTitle>{eventType?.title}</CardTitle>
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Clock className="size-4" />
-                <span>{eventType?.durationMinutes} min</span>
+                <span>{eventType?.durationMinutes} мин</span>
               </div>
             </CardHeader>
             <CardContent>
@@ -122,6 +123,7 @@ export function BookEventPage() {
         <div className="space-y-6">
           <div className="flex justify-center">
             <Calendar
+              locale={ru}
               mode="single"
               selected={selectedDate}
               onSelect={(date) => date && setSelectedDate(date)}
@@ -135,7 +137,7 @@ export function BookEventPage() {
 
           {slots.length > 0 ? (
             <div className="space-y-3">
-              <h3 className="text-sm font-medium">Available times</h3>
+              <h3 className="text-sm font-medium">Доступное время</h3>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {slots.map((slot) => (
                   <Button
@@ -151,7 +153,7 @@ export function BookEventPage() {
             </div>
           ) : (
             <p className="text-center text-sm text-muted-foreground">
-              No available slots for this date.
+              Нет доступных слотов на эту дату.
             </p>
           )}
 
@@ -160,21 +162,21 @@ export function BookEventPage() {
               <Separator />
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="name">Имя *</Label>
                   <Input
                     id="name"
-                    placeholder="Your name"
+                    placeholder="Ваше имя"
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Эл. почта</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="ваш@email.com"
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
                   />
@@ -186,7 +188,7 @@ export function BookEventPage() {
                   {submitting ? (
                     <Loader2 className="mr-1 size-4 animate-spin" />
                   ) : null}
-                  Confirm Booking
+                  Подтвердить бронь
                 </Button>
               </form>
             </>
@@ -202,14 +204,14 @@ export function BookEventPage() {
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Booking confirmed!</DialogTitle>
+            <DialogTitle>Бронь подтверждена!</DialogTitle>
             <DialogDescription>
-              Your booking has been created. Your confirmation ID is{' '}
+              Ваша бронь создана. Номер подтверждения:{' '}
               <strong>{successBooking}</strong>.
             </DialogDescription>
           </DialogHeader>
           <Button onClick={() => { setSuccessBooking(null); navigate('/book') }}>
-            Book another
+            Забронировать ещё
           </Button>
         </DialogContent>
       </Dialog>

@@ -22,16 +22,16 @@ export function BookCatalogPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-16 text-center">
-        <p className="text-destructive">Failed to load event types: {error}</p>
+        <p className="text-destructive">Не удалось загрузить типы встреч: {error}</p>
       </div>
     )
   }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
-      <h1 className="font-heading mb-2 text-3xl font-bold">Available Meeting Types</h1>
+      <h1 className="font-heading mb-2 text-3xl font-bold">Доступные типы встреч</h1>
       <p className="mb-8 text-muted-foreground">
-        Choose a meeting type to book a call.
+        Выберите тип встречи для бронирования.
       </p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {loading
@@ -56,17 +56,17 @@ export function BookCatalogPage() {
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Clock className="size-4" />
-                    <span>{et.durationMinutes} min</span>
+                    <span>{et.durationMinutes} мин</span>
                   </div>
                   <Button className="w-full" render={<Link to={`/book/${et.id}`} />}>
-                    Book
+                    Забронировать
                   </Button>
                 </CardContent>
               </Card>
             ))}
         {!loading && eventTypes.length === 0 && (
           <p className="col-span-full text-center text-muted-foreground">
-            No event types available yet.
+            Пока нет доступных типов встреч.
           </p>
         )}
       </div>
