@@ -15,6 +15,16 @@
 ├── spec/                 # API спецификация (TypeSpec + OpenAPI)
 │   ├── main.tsp
 │   └── output/@typespec/openapi3/openapi.yaml
+├── backend/              # Fastify + TypeScript
+│   ├── src/
+│   │   ├── routes/       # owner.ts, guest.ts
+│   │   ├── services/     # slots.ts — генерация слотов
+│   │   ├── store.ts      # In-memory хранилище
+│   │   ├── app.ts        # Fastify + CORS
+│   │   ├── server.ts     # Точка входа
+│   │   └── types.ts      # Интерфейсы
+│   ├── package.json
+│   └── tsconfig.json
 └── frontend/             # React + TypeScript + Vite
     ├── src/
     │   ├── api/
@@ -66,6 +76,34 @@
 | 404 | `NotFoundError` | Ресурс не найден |
 | 409 | `ConflictError` | Слот уже занят |
 
+## Бэкенд
+
+Бэкенд реализован на Fastify и реализует все эндпоинты из OpenAPI-спецификации. Хранилище in-memory, данные сбрасываются при перезапуске.
+
+### Технологии
+
+| Технология | Назначение |
+|------------|-----------|
+| **Fastify** | HTTP-фреймворк |
+| **Zod** | Валидация входящих запросов |
+| **nanoid** | Генерация ID |
+| **date-fns** | Работа с датами и генерация слотов |
+| **tsx** | Запуск TypeScript без сборки |
+
+### Бизнес-правила
+
+- Слоты генерируются на основе `durationMinutes` типа события (по умолчанию 30 мин)
+- Занятые слоты исключаются из списка доступных
+- При создании брони проверяется пересечение с существующими (409 Conflict)
+- Валидация: обязательные поля, формат email, корректность дат
+- Дата не может быть в прошлом
+- Диапазон слотов — не более 14 дней
+
+```bash
+make backend        # Запуск бэкенда (tsx watch, порт 3000)
+make install-backend
+```
+
 ## Фронтенд
 
 Фронтенд реализуется как отдельная часть приложения в этом же репозитории (`frontend/`). Получает данные и выполняет действия только через API по контракту. Интерфейс должен корректно работать с отдельно запущенным бэкендом.
@@ -76,7 +114,7 @@
 |------------|-----------|
 | **Vite** | Быстрый dev-сервер и сборка фронтенда |
 | **shadcn/ui** | Набор UI-компонентов с гибкой настройкой |
-| **Prism** | Эмулятор API по контракту для разработки и проверки |
+| **Prism** | Эмулятор API для изолированного тестирования |
 | **shadcn MCP Server** | MCP-сервер для взаимодействия агентов с shadcn-элементами |
 
 ### Взаимодействие
@@ -90,14 +128,16 @@
 └──────────────┘                   └──────────────┘
 ```
 
-Разработка фронтенда ведётся с использованием **Prism** для эмуляции API по OpenAPI-спецификации (`spec/output/@typespec/openapi3/openapi.yaml`).
+Разработка фронтенда ведётся с использованием реального бэкенда на Fastify (`backend/`). Для изолированной проверки контракта можно использовать **Prism** с OpenAPI-спецификацией (`spec/output/@typespec/openapi3/openapi.yaml`).
 
 ```bash
-make dev     # Запуск Vite dev-server
-make prism   # Запуск эмуляции API (Prism)
-make build   # Сборка frontend
-make install # Установка зависимостей
-make dev-all # Prism + Vite одновременно
+make dev        # Запуск Vite dev-server
+make backend    # Запуск бэкенда (Fastify)
+make prism      # Запуск эмуляции API (Prism)
+make build      # Сборка frontend
+make install    # Установка зависимостей фронтенда
+make install-backend
+make dev-all    # Backend + Vite одновременно
 ```
 
 ## MCP Servers
