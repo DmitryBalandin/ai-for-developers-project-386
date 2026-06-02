@@ -46,7 +46,7 @@ test('edits an existing event type', async ({ page }) => {
 
 test('deletes an event type', async ({ page }) => {
   const et = await seedEventType({
-    title: 'owner-delete-test',
+    title: 'owner-delete-test-' + Date.now(),
     description: 'Будет удалён',
     durationMinutes: 30,
   })

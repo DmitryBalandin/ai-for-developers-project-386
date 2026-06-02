@@ -6,8 +6,8 @@ test.describe.configure({ mode: 'serial' })
 test('homepage displays hero and navigation CTAs', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Планируйте звонки с лёгкостью' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Забронировать звонок' }).first()).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Управление событиями' }).first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Забронировать звонок' }).first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Управление событиями' }).first()).toBeVisible()
 })
 
 test('shows catalog page loads correctly', async ({ page }) => {
@@ -26,7 +26,7 @@ test('displays event types in catalog', async ({ page }) => {
   await expect(page.getByText(et.title).first()).toBeVisible()
   await expect(page.getByText(et.description).first()).toBeVisible()
   await expect(page.getByText(`${et.durationMinutes} мин`).first()).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Забронировать' }).first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Забронировать' }).first()).toBeVisible()
 })
 
 test('shows calendar and slots for a selected date', async ({ page }) => {

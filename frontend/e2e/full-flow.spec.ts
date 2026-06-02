@@ -22,7 +22,7 @@ test('complete owner→guest→owner flow', async ({ page }) => {
 
   // 3. Guest books a call — click the link inside the specific card
   const catalogCard = page.locator('[data-slot="card"]').filter({ hasText: 'full-flow-test' })
-  await catalogCard.getByRole('link', { name: 'Забронировать' }).first().click()
+  await catalogCard.getByRole('button', { name: 'Забронировать' }).first().click()
   await expect(page.getByText('full-flow-test').first()).toBeVisible()
 
   const tomorrow = getFutureDate(1)

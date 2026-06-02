@@ -307,6 +307,13 @@ chrome-kill-wsl && chrome-start-wsl
 | 404 WebSocket при подключении | `--cdp-endpoint` указан как `ws://...` вместо `http://...` — исправить в `opencode.json` |
 | "Cannot connect to browser" в логах | Убить процессы: `chrome-kill-wsl`, затем снова запустить OpenCode |
 
+## Skills
+
+| Скилл | Описание |
+|-------|----------|
+| `commit-naming` | `.opencode/skills/commit-naming/SKILL.md` — проверка gitignore и предложение названия коммита |
+| `frontend-requirements` | `.opencode/skills/frontend-requirements/SKILL.md` — требования к фронтенду |
+
 ## Совместимость MCP серверов
 
 | Сервер | Статус | Порт | Браузер |
