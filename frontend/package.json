@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test:e2e": "playwright test",
     "prism": "prism mock ../spec/output/@typespec/openapi3/openapi.yaml -p 3000"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.60.0",
     "@stoplight/prism-cli": "^5.14.2",
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^24.12.3",

@@ -18,6 +18,9 @@ install:
 install-backend:
 	cd backend && npm install
 
+test-e2e:
+	cd frontend && npm run test:e2e
+
 dev-all:
 	@echo "Starting backend on port 3000..."
 	cd backend && npm run dev &
