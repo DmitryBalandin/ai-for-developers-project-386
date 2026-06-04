@@ -16,10 +16,9 @@ jobs:
           node-version: 22
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
-      - run: |
-          npm ci
-          cd backend && npm ci
-          cd frontend && npm ci
+      - run: npm ci
+      - run: cd backend && npm ci
+      - run: cd frontend && npm ci
       - run: npm run lint
 
   backend-tests:
@@ -57,9 +56,8 @@ jobs:
           cache-dependency-path: |
             frontend/package-lock.json
             backend/package-lock.json
-      - run: |
-          cd backend && npm ci
-          cd frontend && npm ci
+      - run: cd backend && npm ci
+      - run: cd frontend && npm ci
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
