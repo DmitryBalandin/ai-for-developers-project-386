@@ -1,38 +1,36 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from 'src/components/ui/card'
-import { Button } from 'src/components/ui/button'
-import { Skeleton } from 'src/components/ui/skeleton'
-import { getPublicEventTypes } from 'src/api/guest'
-import type { EventType } from 'src/types'
-import { Clock } from 'lucide-react'
+import { Clock } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getPublicEventTypes } from 'src/api/guest';
+import { Button } from 'src/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'src/components/ui/card';
+import { Skeleton } from 'src/components/ui/skeleton';
+import type { EventType } from 'src/types';
 
 export function BookCatalogPage() {
-  const [eventTypes, setEventTypes] = useState<EventType[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getPublicEventTypes()
       .then(setEventTypes)
       .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false))
-  }, [])
+      .finally(() => setLoading(false));
+  }, []);
 
   if (error) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-16 text-center">
         <p className="text-destructive">Не удалось загрузить типы встреч: {error}</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <h1 className="font-heading mb-2 text-3xl font-bold">Доступные типы встреч</h1>
-      <p className="mb-8 text-muted-foreground">
-        Выберите тип встречи для бронирования.
-      </p>
+      <p className="mb-8 text-muted-foreground">Выберите тип встречи для бронирования.</p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
@@ -65,11 +63,9 @@ export function BookCatalogPage() {
               </Card>
             ))}
         {!loading && eventTypes.length === 0 && (
-          <p className="col-span-full text-center text-muted-foreground">
-            Пока нет доступных типов встреч.
-          </p>
+          <p className="col-span-full text-center text-muted-foreground">Пока нет доступных типов встреч.</p>
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,10 @@
-.PHONY: dev prism build install backend dev-all
+.PHONY: dev prism build install backend dev-all lint format
+
+lint:
+	npx biome check
+
+format:
+	npx biome check --write
 
 dev:
 	cd frontend && npm run dev

@@ -13,11 +13,14 @@ make dev                  # Frontend dev-server (vite, порт 5173)
 make backend              # Backend dev-server (tsx watch src/server.ts, порт 3000)
 make dev-all              # Backend + Frontend одновременно
 make build                # Frontend build: tsc -b && vite build
+make lint                 # Biome check (корень)
+make format               # Biome check --write (автоформат)
 make test-e2e             # Playwright e2e тесты (автозапуск серверов)
 make test-backend         # Backend: vitest (unit + integration)
 make prism                # API mock: prism mock ...openapi.yaml (порт 3000)
-npm run lint              # Frontend: ESLint (внутри frontend/)
 ```
+
+Также `npm run lint` / `npm run format` доступны внутри `frontend/` и `backend/` (вызывают `biome check` локально).
 
 ## API
 
@@ -26,6 +29,7 @@ npm run lint              # Frontend: ESLint (внутри frontend/)
 ## Бэкенд
 
 - Fastify + CORS, Zod валидация, nanoid, date-fns
+- Линтер/форматер: Biome (единый `biome.json` в корне)
 - Точка входа: `backend/src/server.ts`, запуск через `tsx watch`
 - Импорты используют расширение `.js` (tsx-конвенция), не `.ts`
 - `PORT` (по умолч. 3000)
@@ -50,6 +54,7 @@ cd backend && npm test
 - **Tailwind CSS v4**: плагин `@tailwindcss/vite`, CSS через `@import "tailwindcss"` (нет PostCSS config)
 - **Path aliases**: `@/` → `./src/`, `src/` → `./src/`
 - **shadcn/ui**: компоненты в `src/components/ui/`, `cn()` в `src/lib/utils.ts`
+- **Линтер/форматер**: Biome (`biome.json` в корне). `useImportType` обязателен (соответствует `verbatimModuleSyntax`)
 - **TS строгости**: `verbatimModuleSyntax` (нужен `import type`), `noUnusedLocals`, `noUnusedParameters`; build через `tsc -b && vite build` (project references)
 - **Роуты**: `/` (главная), `/book` (каталог), `/book/:eventTypeId` (бронь), `/owner` (панель владельца)
 - **`VITE_API_URL`** (по умолч. `http://localhost:3000`)

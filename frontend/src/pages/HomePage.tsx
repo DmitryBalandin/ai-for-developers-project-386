@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
-import { Button } from 'src/components/ui/button'
-import heroImg from 'src/assets/hero.png'
-import { Clock, Users } from 'lucide-react'
+import { Clock, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import heroImg from 'src/assets/hero.png';
+import { Button } from 'src/components/ui/button';
 
 export function HomePage() {
   return (
@@ -12,8 +12,7 @@ export function HomePage() {
             Планируйте звонки с лёгкостью
           </h1>
           <p className="text-lg text-muted-foreground">
-            Пусть гости бронируют время с вами мгновенно. Никаких писем туда-сюда.
-            Просто выберите время — и готово.
+            Пусть гости бронируют время с вами мгновенно. Никаких писем туда-сюда. Просто выберите время — и готово.
           </p>
           <div className="flex gap-3">
             <Button size="lg" render={<Link to="/book" />}>
@@ -35,13 +34,9 @@ export function HomePage() {
           </div>
         </div>
         <div className="hidden md:block">
-          <img
-            src={heroImg}
-            alt="Иллюстрация календаря"
-            className="w-full rounded-xl"
-          />
+          <img src={heroImg} alt="Иллюстрация календаря" className="w-full rounded-xl" />
         </div>
       </div>
     </div>
-  )
+  );
 }

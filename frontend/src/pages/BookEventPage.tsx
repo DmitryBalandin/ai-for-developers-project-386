@@ -1,85 +1,83 @@
-import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { format, addDays, startOfDay } from 'date-fns'
-import { ru } from 'date-fns/locale'
-import { Calendar } from 'src/components/ui/calendar'
-import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
-import { Button } from 'src/components/ui/button'
-import { Input } from 'src/components/ui/input'
-import { Label } from 'src/components/ui/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from 'src/components/ui/dialog'
-import { Separator } from 'src/components/ui/separator'
-import { getPublicEventTypes, getAvailableSlots, createBooking } from 'src/api/guest'
-import type { EventType, AvailableSlot } from 'src/types'
-import { ApiErrorResponse } from 'src/api/client'
-import { Clock, Loader2 } from 'lucide-react'
+import { addDays, format, startOfDay } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { Clock, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ApiErrorResponse } from 'src/api/client';
+import { createBooking, getAvailableSlots, getPublicEventTypes } from 'src/api/guest';
+import { Button } from 'src/components/ui/button';
+import { Calendar } from 'src/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from 'src/components/ui/dialog';
+import { Input } from 'src/components/ui/input';
+import { Label } from 'src/components/ui/label';
+import { Separator } from 'src/components/ui/separator';
+import type { AvailableSlot, EventType } from 'src/types';
 
 export function BookEventPage() {
-  const { eventTypeId } = useParams<{ eventTypeId: string }>()
-  const navigate = useNavigate()
+  const { eventTypeId } = useParams<{ eventTypeId: string }>();
+  const navigate = useNavigate();
 
-  const [eventType, setEventType] = useState<EventType | null>(null)
-  const [slots, setSlots] = useState<AvailableSlot[]>([])
-  const [selectedDate, setSelectedDate] = useState<Date>(startOfDay(new Date()))
-  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null)
-  const [guestName, setGuestName] = useState('')
-  const [guestEmail, setGuestEmail] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [successBooking, setSuccessBooking] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [eventType, setEventType] = useState<EventType | null>(null);
+  const [slots, setSlots] = useState<AvailableSlot[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(startOfDay(new Date()));
+  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successBooking, setSuccessBooking] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!eventTypeId) return
+    if (!eventTypeId) return;
     getPublicEventTypes()
       .then((types) => {
-        const found = types.find((t) => t.id === eventTypeId)
-        if (!found) throw new Error('Тип встречи не найден')
-        setEventType(found)
+        const found = types.find((t) => t.id === eventTypeId);
+        if (!found) throw new Error('Тип встречи не найден');
+        setEventType(found);
       })
       .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false))
-  }, [eventTypeId])
+      .finally(() => setLoading(false));
+  }, [eventTypeId]);
 
   useEffect(() => {
-    if (!eventTypeId || !selectedDate) return
-    const dateFrom = selectedDate.toISOString()
-    const dateTo = addDays(selectedDate, 1).toISOString()
+    if (!eventTypeId || !selectedDate) return;
+    const dateFrom = selectedDate.toISOString();
+    const dateTo = addDays(selectedDate, 1).toISOString();
     getAvailableSlots(eventTypeId, dateFrom, dateTo)
       .then((newSlots) => {
-        setSlots(newSlots)
-        setSelectedSlot((prev) =>
-          prev && newSlots.some((s) => s.startTime === prev.startTime) ? prev : null,
-        )
+        setSlots(newSlots);
+        setSelectedSlot((prev) => (prev && newSlots.some((s) => s.startTime === prev.startTime) ? prev : null));
       })
       .catch(() => {
-        setSlots([])
-        setSelectedSlot(null)
-      })
-  }, [eventTypeId, selectedDate])
+        setSlots([]);
+        setSelectedSlot(null);
+      });
+  }, [eventTypeId, selectedDate]);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!eventTypeId || !selectedSlot || !guestName.trim()) return
-    setSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    if (!eventTypeId || !selectedSlot || !guestName.trim()) return;
+    setSubmitting(true);
+    setError(null);
     try {
       const booking = await createBooking({
         eventTypeId,
         guestName: guestName.trim(),
         guestEmail: guestEmail.trim() || undefined,
         startTime: selectedSlot.startTime,
-      })
-      setSuccessBooking(booking.id)
+      });
+      setSuccessBooking(booking.id);
     } catch (err) {
       if (err instanceof ApiErrorResponse && err.status === 409) {
-        setError('Этот слот только что заняли. Пожалуйста, выберите другой.')
-        setSelectedSlot(null)
+        setError('Этот слот только что заняли. Пожалуйста, выберите другой.');
+        setSelectedSlot(null);
       } else {
-        setError(err instanceof Error ? err.message : 'Не удалось создать бронь')
+        setError(err instanceof Error ? err.message : 'Не удалось создать бронь');
       }
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -88,7 +86,7 @@ export function BookEventPage() {
       <div className="mx-auto flex max-w-5xl items-center justify-center px-4 py-24">
         <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   if (error && !eventType) {
@@ -99,7 +97,7 @@ export function BookEventPage() {
           Назад к типам встреч
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -152,9 +150,7 @@ export function BookEventPage() {
               </div>
             </div>
           ) : (
-            <p className="text-center text-sm text-muted-foreground">
-              Нет доступных слотов на эту дату.
-            </p>
+            <p className="text-center text-sm text-muted-foreground">Нет доступных слотов на эту дату.</p>
           )}
 
           {selectedSlot && (
@@ -181,13 +177,9 @@ export function BookEventPage() {
                     onChange={(e) => setGuestEmail(e.target.value)}
                   />
                 </div>
-                {error && (
-                  <p className="text-sm text-destructive">{error}</p>
-                )}
+                {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={submitting || !guestName.trim()}>
-                  {submitting ? (
-                    <Loader2 className="mr-1 size-4 animate-spin" />
-                  ) : null}
+                  {submitting ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
                   Подтвердить бронь
                 </Button>
               </form>
@@ -196,25 +188,32 @@ export function BookEventPage() {
         </div>
       </div>
 
-      <Dialog open={!!successBooking} onOpenChange={(open) => {
-        if (!open) {
-          setSuccessBooking(null)
-          navigate('/book')
-        }
-      }}>
+      <Dialog
+        open={!!successBooking}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSuccessBooking(null);
+            navigate('/book');
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Бронь подтверждена!</DialogTitle>
             <DialogDescription>
-              Ваша бронь создана. Номер подтверждения:{' '}
-              <strong>{successBooking}</strong>.
+              Ваша бронь создана. Номер подтверждения: <strong>{successBooking}</strong>.
             </DialogDescription>
           </DialogHeader>
-          <Button onClick={() => { setSuccessBooking(null); navigate('/book') }}>
+          <Button
+            onClick={() => {
+              setSuccessBooking(null);
+              navigate('/book');
+            }}
+          >
             Забронировать ещё
           </Button>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

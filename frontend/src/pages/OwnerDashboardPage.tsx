@@ -1,67 +1,67 @@
-import { useEffect, useState } from 'react'
-import { Card, CardContent } from 'src/components/ui/card'
-import { Button } from 'src/components/ui/button'
-import { Input } from 'src/components/ui/input'
-import { Label } from 'src/components/ui/label'
+import { format } from 'date-fns';
+import { Clock, Edit3, Loader2, Plus, Trash2, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-  DialogTrigger,
-} from 'src/components/ui/dialog'
-import { Separator } from 'src/components/ui/separator'
-import {
-  listEventTypes,
   createEventType,
-  updateEventType,
   deleteEventType,
-  listUpcomingBookings,
   type EventTypeCreate,
   type EventTypeUpdate,
-} from 'src/api/owner'
-import type { EventType, Booking } from 'src/types'
-import { format } from 'date-fns'
-import { Clock, Edit3, Plus, Trash2, Users, Loader2 } from 'lucide-react'
+  listEventTypes,
+  listUpcomingBookings,
+  updateEventType,
+} from 'src/api/owner';
+import { Button } from 'src/components/ui/button';
+import { Card, CardContent } from 'src/components/ui/card';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from 'src/components/ui/dialog';
+import { Input } from 'src/components/ui/input';
+import { Label } from 'src/components/ui/label';
+import { Separator } from 'src/components/ui/separator';
+import type { Booking, EventType } from 'src/types';
 
 export function OwnerDashboardPage() {
-  const [eventTypes, setEventTypes] = useState<EventType[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingType, setEditingType] = useState<EventType | null>(null)
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingType, setEditingType] = useState<EventType | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     listEventTypes()
       .then(setEventTypes)
-      .catch(() => {})
+      .catch(() => {});
     listUpcomingBookings()
       .then(setBookings)
       .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+      .finally(() => setLoading(false));
+  }, []);
 
   async function handleCreate(data: EventTypeCreate) {
-    await createEventType(data)
-    setShowCreateDialog(false)
-    const types = await listEventTypes()
-    setEventTypes(types)
+    await createEventType(data);
+    setShowCreateDialog(false);
+    const types = await listEventTypes();
+    setEventTypes(types);
   }
 
   async function handleUpdate(id: string, data: EventTypeUpdate) {
-    await updateEventType(id, data)
-    setEditingType(null)
-    const types = await listEventTypes()
-    setEventTypes(types)
+    await updateEventType(id, data);
+    setEditingType(null);
+    const types = await listEventTypes();
+    setEventTypes(types);
   }
 
   async function handleDelete(id: string) {
-    await deleteEventType(id)
-    const types = await listEventTypes()
-    setEventTypes(types)
+    await deleteEventType(id);
+    const types = await listEventTypes();
+    setEventTypes(types);
   }
 
   return (
@@ -75,7 +75,14 @@ export function OwnerDashboardPage() {
             Типы событий
           </h2>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger render={<Button size="sm"><Plus className="size-4" />Создать</Button>} />
+            <DialogTrigger
+              render={
+                <Button size="sm">
+                  <Plus className="size-4" />
+                  Создать
+                </Button>
+              }
+            />
             <EventTypeForm onSubmit={handleCreate} />
           </Dialog>
         </div>
@@ -99,32 +106,21 @@ export function OwnerDashboardPage() {
                     <Dialog
                       open={editingType?.id === et.id}
                       onOpenChange={(open) => {
-                        if (!open) setEditingType(null)
+                        if (!open) setEditingType(null);
                       }}
                     >
                       <DialogTrigger
                         render={
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => setEditingType(et)}
-                          >
+                          <Button variant="ghost" size="icon-sm" onClick={() => setEditingType(et)}>
                             <Edit3 className="size-4" />
                           </Button>
                         }
                       />
                       {editingType?.id === et.id && (
-                        <EventTypeForm
-                          initial={editingType}
-                          onSubmit={(data) => handleUpdate(et.id, data)}
-                        />
+                        <EventTypeForm initial={editingType} onSubmit={(data) => handleUpdate(et.id, data)} />
                       )}
                     </Dialog>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => handleDelete(et.id)}
-                    >
+                    <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(et.id)}>
                       <Trash2 className="size-4" />
                     </Button>
                   </div>
@@ -132,9 +128,7 @@ export function OwnerDashboardPage() {
               </Card>
             ))}
             {eventTypes.length === 0 && (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                Пока нет типов событий. Создайте!
-              </p>
+              <p className="py-4 text-center text-sm text-muted-foreground">Пока нет типов событий. Создайте!</p>
             )}
           </div>
         )}
@@ -172,44 +166,42 @@ export function OwnerDashboardPage() {
               </Card>
             ))}
             {bookings.length === 0 && (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                Нет предстоящих броней.
-              </p>
+              <p className="py-4 text-center text-sm text-muted-foreground">Нет предстоящих броней.</p>
             )}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function EventTypeForm({
   initial,
   onSubmit,
 }: {
-  initial?: EventType
-  onSubmit: (data: EventTypeCreate) => Promise<void>
+  initial?: EventType;
+  onSubmit: (data: EventTypeCreate) => Promise<void>;
 }) {
-  const [title, setTitle] = useState(initial?.title ?? '')
-  const [description, setDescription] = useState(initial?.description ?? '')
-  const [duration, setDuration] = useState(String(initial?.durationMinutes ?? 30))
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [duration, setDuration] = useState(String(initial?.durationMinutes ?? 30));
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
     try {
       await onSubmit({
         title: title.trim(),
         description: description.trim(),
         durationMinutes: Number(duration),
-      })
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось сохранить')
+      setError(err instanceof Error ? err.message : 'Не удалось сохранить');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -244,9 +236,7 @@ function EventTypeForm({
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
         <DialogFooter>
-          <DialogClose render={<Button type="button" variant="outline" disabled={submitting} />}>
-            Отмена
-          </DialogClose>
+          <DialogClose render={<Button type="button" variant="outline" disabled={submitting} />}>Отмена</DialogClose>
           <Button type="submit" disabled={submitting}>
             {submitting ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
             {initial ? 'Сохранить' : 'Создать'}
@@ -254,5 +244,5 @@ function EventTypeForm({
         </DialogFooter>
       </form>
     </DialogContent>
-  )
+  );
 }

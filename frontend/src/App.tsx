@@ -1,10 +1,10 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import { HomePage } from 'src/pages/HomePage'
-import { BookCatalogPage } from 'src/pages/BookCatalogPage'
-import { BookEventPage } from 'src/pages/BookEventPage'
-import { OwnerDashboardPage } from 'src/pages/OwnerDashboardPage'
-import { Button } from 'src/components/ui/button'
-import { Calendar } from 'lucide-react'
+import { Calendar } from 'lucide-react';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { Button } from 'src/components/ui/button';
+import { BookCatalogPage } from 'src/pages/BookCatalogPage';
+import { BookEventPage } from 'src/pages/BookEventPage';
+import { HomePage } from 'src/pages/HomePage';
+import { OwnerDashboardPage } from 'src/pages/OwnerDashboardPage';
 
 function App() {
   return (
@@ -36,7 +36,7 @@ function App() {
         </main>
       </div>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
