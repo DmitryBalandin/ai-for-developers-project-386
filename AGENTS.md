@@ -1,5 +1,7 @@
 # AGENTS.md
 
+**Important:** Before committing or pushing, always ask the user for confirmation first, unless the user explicitly said to do so.
+
 **Calendar of Calls** — упрощённый сервис бронирования времени (Cal.com-like). Владелец создаёт типы событий, гость бронирует слоты.
 
 Два пакета: `backend/` (Fastify + TypeScript) и `frontend/` (React 19 + Vite + shadcn/ui). Данные в in-memory хранилище, сбрасываются при перезапуске.
