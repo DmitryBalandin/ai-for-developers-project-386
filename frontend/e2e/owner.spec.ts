@@ -10,6 +10,22 @@ test('shows dashboard page loads correctly', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Предстоящие брони' })).toBeVisible()
 })
 
+test('shows empty state when no event types', async ({ page }) => {
+  await page.route('**/api/event-types', (route) => {
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+  })
+  await page.goto('/owner')
+  await expect(page.getByText('Пока нет типов событий. Создайте!')).toBeVisible()
+})
+
+test('shows empty bookings state', async ({ page }) => {
+  await page.route('**/api/bookings', (route) => {
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+  })
+  await page.goto('/owner')
+  await expect(page.getByText('Нет предстоящих броней.')).toBeVisible()
+})
+
 test('creates a new event type', async ({ page }) => {
   await page.goto('/owner')
   await page.getByRole('button', { name: 'Создать' }).click()
@@ -25,7 +41,7 @@ test('creates a new event type', async ({ page }) => {
   await expect(page.getByText('Созданный тип').first()).toBeVisible()
 })
 
-test('edits an existing event type', async ({ page }) => {
+test('edits an event type through the UI', async ({ page }) => {
   const et = await seedEventType({
     title: 'owner-edit-before',
     description: 'До редактирования',
@@ -39,14 +55,19 @@ test('edits an existing event type', async ({ page }) => {
   await cardContent.locator('button').first().click()
   await expect(page.getByRole('dialog')).toBeVisible()
 
-  await expect(page.locator('#et-title')).toHaveValue(et.title)
-  await expect(page.locator('#et-desc')).toHaveValue(et.description)
-  await expect(page.locator('#et-dur')).toHaveValue(String(et.durationMinutes))
+  await page.fill('#et-title', 'owner-edit-after')
+  await page.fill('#et-desc', 'После редактирования')
+  await page.fill('#et-dur', '60')
+  await page.getByRole('button', { name: 'Сохранить' }).click()
+
+  await expect(page.getByText('owner-edit-after').first()).toBeVisible()
+  await expect(page.getByText('После редактирования').first()).toBeVisible()
+  await expect(page.getByText('60 мин').first()).toBeVisible()
 })
 
-test('deletes an event type', async ({ page }) => {
+test('deletes an event type through the UI', async ({ page }) => {
   const et = await seedEventType({
-    title: 'owner-delete-test-' + Date.now(),
+    title: 'owner-delete-ui',
     description: 'Будет удалён',
     durationMinutes: 30,
   })
@@ -54,14 +75,9 @@ test('deletes an event type', async ({ page }) => {
   await page.goto('/owner')
   await expect(page.getByText(et.title).first()).toBeVisible()
 
-  // Delete via backend API directly (from Node.js, bypassing CORS)
-  const res = await fetch('http://localhost:3000/api/event-types/' + et.id, {
-    method: 'DELETE',
-  })
-  expect(res.status).toBe(204)
+  const card = page.locator('[data-slot="card"]').filter({ hasText: et.title })
+  await card.locator('button').nth(1).click()
 
-  // Reload page to verify deletion is reflected in the UI
-  await page.goto('/owner')
   await expect(page.getByText(et.title).first()).not.toBeVisible()
 })
 

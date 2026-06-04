@@ -8,6 +8,7 @@ export async function buildApp() {
 
   await app.register(cors, {
     origin: true,
+    methods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH'],
   })
 
   registerOwnerRoutes(app)

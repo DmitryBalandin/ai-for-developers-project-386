@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "node --loader tsx src/server.ts"
+    "start": "node --loader tsx src/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
@@ -17,6 +19,7 @@
     "@fastify/cors": "^11.0.1",
     "@types/node": "^22.14.1",
     "tsx": "^4.19.3",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "vitest": "^4.1.8"
   }
 }

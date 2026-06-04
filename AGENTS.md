@@ -14,6 +14,7 @@ make backend              # Backend dev-server (tsx watch src/server.ts, пор�
 make dev-all              # Backend + Frontend одновременно
 make build                # Frontend build: tsc -b && vite build
 make test-e2e             # Playwright e2e тесты (автозапуск серверов)
+make test-backend         # Backend: vitest (unit + integration)
 make prism                # API mock: prism mock ...openapi.yaml (порт 3000)
 npm run lint              # Frontend: ESLint (внутри frontend/)
 ```
@@ -28,6 +29,21 @@ npm run lint              # Frontend: ESLint (внутри frontend/)
 - Точка входа: `backend/src/server.ts`, запуск через `tsx watch`
 - Импорты используют расширение `.js` (tsx-конвенция), не `.ts`
 - `PORT` (по умолч. 3000)
+- Для изоляции тестов у Store есть метод `reset()`
+
+## Бэкенд-тесты
+
+Vitest в `backend/src/__tests__/`. Два набора:
+- `slots.test.ts` — unit-тесты `generateSlots` (чистая функция)
+- `routes.test.ts` — интеграционные тесты через `app.inject()` (Fastify in-memory)
+
+Изоляция через `store.reset()` в `beforeEach`. Запуск:
+
+```bash
+make test-backend
+# или
+cd backend && npm test
+```
 
 ## Фронтенд
 

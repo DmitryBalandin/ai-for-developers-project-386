@@ -5,6 +5,11 @@ class Store {
   private eventTypes = new Map<string, EventType>()
   private bookings = new Map<string, Booking>()
 
+  reset(): void {
+    this.eventTypes.clear()
+    this.bookings.clear()
+  }
+
   createEventType(data: EventTypeCreate): EventType {
     const eventType: EventType = {
       id: nanoid(),
