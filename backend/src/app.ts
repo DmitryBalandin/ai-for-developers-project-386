@@ -1,7 +1,12 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
 import { registerGuestRoutes } from './routes/guest.js';
 import { registerOwnerRoutes } from './routes/owner.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function buildApp() {
   const app = Fastify({ logger: true });
@@ -13,6 +18,17 @@ export async function buildApp() {
 
   registerOwnerRoutes(app);
   registerGuestRoutes(app);
+
+  const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+  await app.register(fastifyStatic, {
+    root: frontendDist,
+    prefix: '/',
+    wildcard: false,
+  });
+
+  app.setNotFoundHandler((_request, reply) => {
+    reply.sendFile('index.html');
+  });
 
   app.setErrorHandler((error, _request, reply) => {
     app.log.error(error);

@@ -26,6 +26,11 @@
       "type": "local",
       "command": ["npx", "shadcn@latest", "mcp"],
       "enabled": true
+    },
+    "render": {
+      "type": "local",
+      "command": ["bash", "-c", "set -a && . /home/user/hexlet/ai-for-developers-project-386/.env && set +a && exec docker run -i --rm -e RENDER_API_KEY ghcr.io/render-oss/render-mcp-server"],
+      "enabled": true
     }
   }
 }
