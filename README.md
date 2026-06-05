@@ -1,3 +1,5 @@
+Deploy: https://ai-for-developers-project-386-8n38.onrender.com/
+
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/DmitryBalandin/ai-for-developers-project-386/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/DmitryBalandin/ai-for-developers-project-386/actions)
 [![CI](https://github.com/DmitryBalandin/ai-for-developers-project-386/actions/workflows/ci.yml/badge.svg)](https://github.com/DmitryBalandin/ai-for-developers-project-386/actions)
