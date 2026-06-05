@@ -23,7 +23,6 @@ export async function buildApp() {
   await app.register(fastifyStatic, {
     root: frontendDist,
     prefix: '/',
-    wildcard: false,
   });
 
   app.setNotFoundHandler((_request, reply) => {
