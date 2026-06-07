@@ -1,6 +1,7 @@
-import { addDays, differenceInDays, isBefore } from 'date-fns';
+import { differenceInDays, isBefore } from 'date-fns';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { BookingError, validateBookingCreation } from '../services/bookings.js';
 import { generateSlots } from '../services/slots.js';
 import { store } from '../store.js';
 
@@ -11,46 +12,55 @@ const bookingCreateSchema = z.object({
   startTime: z.string().min(1, 'Start time is required'),
 });
 
+const slotsParamsSchema = z.object({
+  eventTypeId: z.string().min(1),
+});
+
+const slotsQuerySchema = z.object({
+  dateFrom: z.string().datetime({ message: 'Invalid date format. Use ISO 8601.' }),
+  dateTo: z.string().datetime({ message: 'Invalid date format. Use ISO 8601.' }),
+});
+
 export function registerGuestRoutes(app: FastifyInstance): void {
   app.get('/api/public/event-types', async (_request, reply) => {
     return reply.send(store.listEventTypes());
   });
 
   app.get('/api/public/event-types/:eventTypeId/slots', async (request, reply) => {
-    const { eventTypeId } = request.params as { eventTypeId: string };
-    const query = request.query as { dateFrom?: string; dateTo?: string };
+    const parsedParams = slotsParamsSchema.safeParse(request.params);
+    if (!parsedParams.success) {
+      return reply.status(400).send({
+        code: 400,
+        message: parsedParams.error.issues.map((i) => i.message).join('; '),
+      });
+    }
+    const { eventTypeId } = parsedParams.data;
+
+    const parsedQuery = slotsQuerySchema.safeParse(request.query);
+    if (!parsedQuery.success) {
+      return reply.status(400).send({
+        code: 400,
+        message: parsedQuery.error.issues.map((i) => i.message).join('; '),
+      });
+    }
+    const { dateFrom, dateTo } = parsedQuery.data;
 
     const eventType = store.getEventType(eventTypeId);
     if (!eventType) {
       return reply.status(404).send({ code: 404, message: 'Event type not found' });
     }
 
-    if (!query.dateFrom || !query.dateTo) {
-      return reply.status(400).send({
-        code: 400,
-        message: 'dateFrom and dateTo query parameters are required',
-      });
-    }
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
 
-    const dateFrom = new Date(query.dateFrom);
-    const dateTo = new Date(query.dateTo);
-
-    if (Number.isNaN(dateFrom.getTime()) || Number.isNaN(dateTo.getTime())) {
-      return reply.status(400).send({
-        code: 400,
-        message: 'Invalid date format. Use ISO 8601.',
-      });
-    }
-
-    if (isBefore(dateTo, dateFrom)) {
+    if (isBefore(to, from)) {
       return reply.status(400).send({
         code: 400,
         message: 'dateTo must be after dateFrom',
       });
     }
 
-    const daysDiff = differenceInDays(dateTo, dateFrom);
-    if (daysDiff > 14) {
+    if (differenceInDays(to, from) > 14) {
       return reply.status(400).send({
         code: 400,
         message: 'Date range must not exceed 14 days',
@@ -58,7 +68,7 @@ export function registerGuestRoutes(app: FastifyInstance): void {
     }
 
     const existingBookings = store.getBookingsByEventType(eventTypeId);
-    const slots = generateSlots(eventType, dateFrom, dateTo, existingBookings);
+    const slots = generateSlots(eventType, from, to, existingBookings);
     return reply.send(slots);
   });
 
@@ -78,41 +88,23 @@ export function registerGuestRoutes(app: FastifyInstance): void {
       return reply.status(404).send({ code: 404, message: 'Event type not found' });
     }
 
-    const startDate = new Date(startTime);
-    if (Number.isNaN(startDate.getTime())) {
-      return reply.status(400).send({
-        code: 400,
-        message: 'Invalid startTime format',
-      });
+    try {
+      const existing = store.getBookingsByEventType(eventTypeId);
+      const { endDate } = validateBookingCreation(eventType, startTime, existing);
+
+      const booking = store.createBooking(
+        { eventTypeId, guestName, guestEmail: guestEmail || undefined, startTime },
+        endDate.toISOString(),
+      );
+      return reply.status(201).send(booking);
+    } catch (error) {
+      if (error instanceof BookingError) {
+        return reply.status(error.statusCode).send({
+          code: error.statusCode,
+          message: error.message,
+        });
+      }
+      throw error;
     }
-
-    if (isBefore(startDate, new Date())) {
-      return reply.status(400).send({
-        code: 400,
-        message: 'Cannot book in the past',
-      });
-    }
-
-    const endDate = addDays(startDate, 0);
-    endDate.setMinutes(endDate.getMinutes() + eventType.durationMinutes);
-    const endTime = endDate.toISOString();
-
-    const existing = store.getBookingsByEventType(eventTypeId);
-    const hasConflict = existing.some(
-      (b) =>
-        b.status === 'confirmed' &&
-        isBefore(new Date(b.startTime), endDate) &&
-        isBefore(startDate, new Date(b.endTime)),
-    );
-
-    if (hasConflict) {
-      return reply.status(409).send({ code: 409, message: 'This time slot is already booked' });
-    }
-
-    const booking = store.createBooking(
-      { eventTypeId, guestName, guestEmail: guestEmail || undefined, startTime },
-      endTime,
-    );
-    return reply.status(201).send(booking);
   });
 }

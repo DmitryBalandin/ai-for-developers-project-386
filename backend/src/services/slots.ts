@@ -1,6 +1,13 @@
 import { addMinutes, isBefore } from 'date-fns';
 import type { AvailableSlot, Booking, EventType } from '../types.js';
 
+export function isSlotAvailable(startTime: Date, endTime: Date, existingBookings: Booking[]): boolean {
+  return !existingBookings.some(
+    (b) =>
+      b.status === 'confirmed' && isBefore(new Date(b.startTime), endTime) && isBefore(startTime, new Date(b.endTime)),
+  );
+}
+
 export function generateSlots(
   eventType: EventType,
   dateFrom: Date,
@@ -14,14 +21,7 @@ export function generateSlots(
     const slotEnd = addMinutes(current, eventType.durationMinutes);
     if (isBefore(dateTo, slotEnd)) break;
 
-    const isOccupied = existingBookings.some(
-      (booking) =>
-        booking.status === 'confirmed' &&
-        isBefore(new Date(booking.startTime), slotEnd) &&
-        isBefore(current, new Date(booking.endTime)),
-    );
-
-    if (!isOccupied) {
+    if (isSlotAvailable(current, slotEnd, existingBookings)) {
       slots.push({
         startTime: current.toISOString(),
         endTime: slotEnd.toISOString(),

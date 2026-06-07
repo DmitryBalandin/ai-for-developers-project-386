@@ -14,6 +14,10 @@ const eventTypeUpdateSchema = z.object({
   durationMinutes: z.number().int().min(1).optional(),
 });
 
+const eventTypeIdParamSchema = z.object({
+  id: z.string().min(1, 'Event type ID is required'),
+});
+
 export function registerOwnerRoutes(app: FastifyInstance): void {
   app.post('/api/event-types', async (request, reply) => {
     const parsed = eventTypeCreateSchema.safeParse(request.body);
@@ -32,7 +36,14 @@ export function registerOwnerRoutes(app: FastifyInstance): void {
   });
 
   app.get('/api/event-types/:id', async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const parsed = eventTypeIdParamSchema.safeParse(request.params);
+    if (!parsed.success) {
+      return reply.status(400).send({
+        code: 400,
+        message: parsed.error.issues.map((i) => i.message).join('; '),
+      });
+    }
+    const { id } = parsed.data;
     const eventType = store.getEventType(id);
     if (!eventType) {
       return reply.status(404).send({ code: 404, message: 'Event type not found' });
@@ -41,15 +52,23 @@ export function registerOwnerRoutes(app: FastifyInstance): void {
   });
 
   app.put('/api/event-types/:id', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const parsed = eventTypeUpdateSchema.safeParse(request.body);
-    if (!parsed.success) {
+    const parsedParams = eventTypeIdParamSchema.safeParse(request.params);
+    if (!parsedParams.success) {
       return reply.status(400).send({
         code: 400,
-        message: parsed.error.issues.map((i) => i.message).join('; '),
+        message: parsedParams.error.issues.map((i) => i.message).join('; '),
       });
     }
-    const updated = store.updateEventType(id, parsed.data);
+    const { id } = parsedParams.data;
+
+    const parsedBody = eventTypeUpdateSchema.safeParse(request.body);
+    if (!parsedBody.success) {
+      return reply.status(400).send({
+        code: 400,
+        message: parsedBody.error.issues.map((i) => i.message).join('; '),
+      });
+    }
+    const updated = store.updateEventType(id, parsedBody.data);
     if (!updated) {
       return reply.status(404).send({ code: 404, message: 'Event type not found' });
     }
@@ -57,7 +76,14 @@ export function registerOwnerRoutes(app: FastifyInstance): void {
   });
 
   app.delete('/api/event-types/:id', async (request, reply) => {
-    const { id } = request.params as { id: string };
+    const parsed = eventTypeIdParamSchema.safeParse(request.params);
+    if (!parsed.success) {
+      return reply.status(400).send({
+        code: 400,
+        message: parsed.error.issues.map((i) => i.message).join('; '),
+      });
+    }
+    const { id } = parsed.data;
     const deleted = store.deleteEventType(id);
     if (!deleted) {
       return reply.status(404).send({ code: 404, message: 'Event type not found' });
