@@ -13,7 +13,9 @@ make install              # Frontend: npm install
 make install-backend      # Backend: npm install
 make dev                  # Frontend dev-server (vite, порт 5173)
 make backend              # Backend dev-server (tsx watch src/server.ts, порт 3000)
-make dev-all              # Backend + Frontend одновременно
+make dev-all              # Backend + Frontend одновременно (для терминала)
+make start                # Backend + Frontend через setsid (для AI-агента)
+make stop                 # Остановка dev-серверов
 make build                # Frontend build: tsc -b && vite build
 make lint                 # Biome check (корень)
 make format               # Biome check --write (автоформат)
@@ -71,6 +73,31 @@ Playwright в `frontend/e2e/`. Конфиг сам запускает бэкен
 |-------|------|----------|
 | `commit-naming` | `.opencode/skills/commit-naming/SKILL.md` | Проверка gitignore и conventional commit |
 | `frontend-requirements` | `.opencode/skills/frontend-requirements/SKILL.md` | Требования к фронтенду |
+
+## Запуск dev-серверов для AI-агента
+
+`make dev-all` запускает процессы в foreground — при таймауте bash tool они убиваются.
+Для надёжного старта используйте `make start` (через `setsid`):
+
+```bash
+make start   # Запуск бэкенда (3000) + фронтенда (5173)
+make stop    # Остановка обоих серверов
+```
+
+Либо по отдельности через `setsid` напрямую:
+
+```bash
+# Бэкенд
+cd backend && setsid sh -c 'exec npm run dev >> /tmp/backend.log 2>&1' &
+
+# Фронтенд (--host для доступа по сети)
+cd frontend && setsid sh -c 'exec npx vite --host >> /tmp/frontend.log 2>&1' &
+
+# Проверка
+sleep 3 && curl -s http://localhost:5173/ | head -3
+```
+
+Логи пишутся в `/tmp/backend.log` и `/tmp/frontend.log`.
 
 ## Браузерная автоматизация
 
